@@ -90,16 +90,12 @@ end
 local function dropItems()
    for i=1,16 do
       turtle.select(i)
-      if dirt_slot() then
-         true
-      else
-         turtle.drop()
-      end
+      turtle.drop()
    end
    turtle.select(1)
 end
 
-local function dig(front, right)
+local function dig(front, right, current_height, fill_height)
    print("Digging in ", front, " ", right)
 
    print("First layer not touched!")
@@ -129,12 +125,15 @@ local function dig(front, right)
          end
 
          -- back to original height
-         for i=1,y do
+         for i=y,1,-1 do
             turtle.up()
             local stone_slot = get_dirt_slot()
             if stone_slot ~= 0 then
-               turtle.select(stone_slot)
-               turtle.placeDown()
+               if i > (current_height - fill_height) then
+                  print("placing block at height: ", i)
+                  turtle.select(stone_slot)
+                  turtle.placeDown()
+               end
             end
          end
 
@@ -156,11 +155,11 @@ local function usage()
 end
 
 local function main()
-   if #tArgs < 3 then
+   if #tArgs < 5 then
       print("Not enough arguments!")
       usage()
       return
-   elseif #tArgs > 3 then
+   elseif #tArgs > 5 then
       print("Too much arguments!")
       usage()
       return
@@ -168,8 +167,10 @@ local function main()
       action = tArgs[1]
       front = tArgs[2]
       right = tArgs[3]
+      current_height = tArgs[4]
+      fill_to = tArgs[5]
       if action == "dig" then
-         dig(front, right)
+         dig(front, right, current_height, fill_to)
       else
          print("Action not recognized, allowed actions are [dig].")
          return
